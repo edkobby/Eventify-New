@@ -95,9 +95,16 @@ function App() {
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem("currentUser")
-    setCurrentUser(null)
-    addNotification("You have been logged out", "info")
+    console.log("Logout function called")
+    try {
+      localStorage.removeItem("currentUser")
+      console.log("localStorage cleared")
+      setCurrentUser(null)
+      console.log("currentUser state set to null")
+      addNotification("You have been logged out", "info")
+    } catch (error) {
+      console.error("Error during logout:", error)
+    }
   }
 
   // Register function
@@ -194,6 +201,11 @@ function App() {
       tickets: newTickets,
     }
   }
+
+  // Log when currentUser changes
+  useEffect(() => {
+    console.log("Current user state:", currentUser)
+  }, [currentUser])
 
   if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>

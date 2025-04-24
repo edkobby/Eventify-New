@@ -1,6 +1,6 @@
 "use client"
 
-import { useContext } from "react"
+import { useContext, useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Bell, User, LogOut, Calendar, Ticket, Menu } from "lucide-react"
 import { AuthContext, NotificationContext } from "../App"
@@ -10,8 +10,23 @@ const Navbar = () => {
   const { currentUser, logout } = useContext(AuthContext)
   const { notifications, showNotifications, setShowNotifications } = useContext(NotificationContext)
   const navigate = useNavigate()
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
   const unreadCount = notifications.filter((n) => !n.read).length
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Only close if clicking outside the profile menu
+      if (isProfileMenuOpen && !event.target.closest(".profile-menu-container")) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isProfileMenuOpen])
 
   return (
     <nav className="bg-white shadow-md">
@@ -72,30 +87,52 @@ const Navbar = () => {
                   )}
                 </button>
 
-                <div className="ml-3 relative group">
+                <div className="ml-3 relative profile-menu-container">
                   <div className="flex items-center">
-                    <button className="flex text-sm rounded-full focus:outline-none">
+                    <button
+                      className="flex text-sm rounded-full focus:outline-none"
+                      onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                    >
                       <span className="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600/10 to-teal-500/10 flex items-center justify-center">
                         <User className="h-5 w-5 text-purple-600" />
                       </span>
+                      <span className="ml-2 text-gray-700">{currentUser.name}</span>
+                      <span className="ml-2 text-xs text-gray-500">({currentUser.role})</span>
                     </button>
-                    <span className="ml-2 text-gray-700">{currentUser.name}</span>
-                    <span className="ml-2 text-xs text-gray-500">({currentUser.role})</span>
                   </div>
 
-                  <div className="hidden group-hover:block absolute right-0 mt-2 w-48 py-1 bg-white rounded-md shadow-lg z-10">
-                    <button
-                      onClick={() => {
-                        logout()
-                        navigate("/")
-                      }}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign out
-                    </button>
-                  </div>
+                  {isProfileMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 py-1 bg-white rounded-md shadow-lg z-10">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          console.log("Sign out button clicked")
+                          logout()
+                          setIsProfileMenuOpen(false)
+                          setTimeout(() => navigate("/"), 100)
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                      >
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
                 </div>
+                {currentUser && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault()
+                      console.log("Direct logout button clicked")
+                      logout()
+                      setTimeout(() => navigate("/"), 100)
+                    }}
+                    className="ml-4 px-3 py-1 text-xs bg-red-100 text-red-700 rounded-md"
+                  >
+                    Logout
+                  </button>
+                )}
               </div>
             ) : (
               <div className="flex items-center space-x-2">

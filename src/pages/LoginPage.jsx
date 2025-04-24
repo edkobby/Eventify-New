@@ -5,9 +5,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom"
 import { AuthContext } from "../App"
 
 const LoginPage = () => {
-  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [name, setName] = useState("")
-  const [role, setRole] = useState("attendee")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
@@ -16,14 +15,14 @@ const LoginPage = () => {
   const location = useLocation()
 
   // Get the redirect path from location state or default to home
-  const from = location.state?.from?.pathname || "/"
+  const from = location.state?.from || "/"
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
 
-    if (!email || !name) {
+    if (!password || !name) {
       setError("Please fill in all fields")
       setIsLoading(false)
       return
@@ -31,16 +30,11 @@ const LoginPage = () => {
 
     try {
       // Use the direct login function that bypasses registration
-      const result = await loginDirect(name, email, role)
+      const result = await loginDirect(name, password, "attendee")
 
       if (result.success) {
-        // Redirect based on user role
-        if (result.role === "organizer") {
-          navigate("/organizer/dashboard")
-        } else {
-          // Redirect to the page they tried to access or home
-          navigate(from)
-        }
+        // Redirect to the page they tried to access or home
+        navigate(from)
       } else {
         setError(result.message || "Login failed")
       }
@@ -77,56 +71,19 @@ const LoginPage = () => {
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
             </label>
             <input
-              id="email"
-              type="email"
+              id="password"
+              type="password"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
-              placeholder="Enter your email"
+              placeholder="Enter your password"
               required
             />
-          </div>
-
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center">
-                <input
-                  id="attendee"
-                  type="radio"
-                  name="role"
-                  value="attendee"
-                  className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300"
-                  checked={role === "attendee"}
-                  onChange={() => setRole("attendee")}
-                  disabled={isLoading}
-                />
-                <label htmlFor="attendee" className="ml-2 block text-sm text-gray-700">
-                  Attendee (I want to discover and attend events)
-                </label>
-              </div>
-
-              <div className="flex items-center">
-                <input
-                  id="organizer"
-                  type="radio"
-                  name="role"
-                  value="organizer"
-                  className="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300"
-                  checked={role === "organizer"}
-                  onChange={() => setRole("organizer")}
-                  disabled={isLoading}
-                />
-                <label htmlFor="organizer" className="ml-2 block text-sm text-gray-700">
-                  Organizer (I want to create and manage events)
-                </label>
-              </div>
-            </div>
           </div>
 
           <button
@@ -149,7 +106,7 @@ const LoginPage = () => {
 
         <div className="mt-6 text-center text-xs text-gray-500">
           <p>This is a demo application. No real authentication is performed.</p>
-          <p>Simply enter your details and select a role to access the platform.</p>
+          <p>Simply enter your details to access the platform.</p>
         </div>
       </div>
     </div>

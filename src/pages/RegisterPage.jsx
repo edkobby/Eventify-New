@@ -34,7 +34,6 @@ const RegisterPage = () => {
     }
 
     try {
-      // In a real app, this would be an API call
       const result = await register(name, email, password, role)
 
       if (result.success) {
